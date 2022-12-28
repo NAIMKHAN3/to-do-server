@@ -55,8 +55,9 @@ async function run() {
         })
         app.post('/completetask', async (req, res) => {
             const task = req.body;
+            const complete = { taskName: task.taskName, description: task.description, imageLink: task.imageLink, email: task.email }
             try {
-                const result = await todoCompleteCollection.insertOne(task);
+                const result = await todoCompleteCollection.insertOne(complete);
                 const id = task._id;
                 const filter = { _id: ObjectId(id) }
                 const deleteTodo = await todoCollection.deleteOne(filter);
@@ -87,6 +88,32 @@ async function run() {
                 const email = req.query.email;
                 const filter = { email: email }
                 const result = await todoCompleteCollection.find(filter).toArray();
+                res.send(result)
+            }
+            catch {
+                res.send("cann't my task")
+            }
+        })
+        app.delete('/deletectask', async (req, res) => {
+            try {
+                const id = req.query.id;
+                console.log(id)
+                const filter = { _id: ObjectId(id) }
+                const result = await todoCompleteCollection.deleteOne(filter);
+                console.log(result)
+                res.send(result)
+            }
+            catch {
+                res.send("cann't my task")
+            }
+        })
+        app.delete('/deletetask', async (req, res) => {
+            try {
+                const id = req.query.id;
+                console.log(id)
+                const filter = { _id: ObjectId(id) }
+                const result = await todoCollection.deleteOne(filter);
+                console.log(result)
                 res.send(result)
             }
             catch {
