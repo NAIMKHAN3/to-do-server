@@ -53,6 +53,24 @@ async function run() {
                 res.send("cann't add task")
             }
         })
+        app.post('/nComplete', async (req, res) => {
+            const tasks = req.body;
+            const taskName = tasks.taskName;
+            const description = tasks.description;
+            const imageLink = tasks.imageLink;
+            const email = tasks.email;
+            const task = { taskName, description, imageLink, email }
+            try {
+                const result = await todoCollection.insertOne(task);
+                const id = tasks._id;
+                const filter = { _id: ObjectId(id) }
+                const nComplete = await todoCompleteCollection.deleteOne(filter);
+                res.send(result)
+            }
+            catch {
+                res.send("cann't non complete task")
+            }
+        })
         app.post('/completetask', async (req, res) => {
             const task = req.body;
             const complete = { taskName: task.taskName, description: task.description, imageLink: task.imageLink, email: task.email }
@@ -61,7 +79,6 @@ async function run() {
                 const id = task._id;
                 const filter = { _id: ObjectId(id) }
                 const deleteTodo = await todoCollection.deleteOne(filter);
-                console.log(deleteTodo)
                 if (deleteTodo.deletedCount) {
                     res.send(result)
                 }
@@ -83,6 +100,17 @@ async function run() {
                 res.send("cann't my task")
             }
         })
+        app.get('/utask/:id', async (req, res) => {
+            try {
+                const id = req.params.id;
+                const filter = { _id: ObjectId(id) }
+                const result = await todoCollection.findOne(filter);
+                res.send(result)
+            }
+            catch {
+                res.send("cann't my task")
+            }
+        })
         app.get('/ctask', async (req, res) => {
             try {
                 const email = req.query.email;
@@ -97,23 +125,46 @@ async function run() {
         app.delete('/deletectask', async (req, res) => {
             try {
                 const id = req.query.id;
-                console.log(id)
                 const filter = { _id: ObjectId(id) }
                 const result = await todoCompleteCollection.deleteOne(filter);
-                console.log(result)
                 res.send(result)
             }
             catch {
                 res.send("cann't my task")
             }
         })
+
+        app.put('/updatetask', async (req, res) => {
+            try {
+                const tasks = req.body;
+                const id = tasks.id;
+                const filter = { _id: ObjectId(id) };
+                const option = { upsert: true }
+                const taskName = tasks.taskName;
+                const description = tasks.description;
+                const imageLink = tasks.imageLink;
+                const email = tasks.email;
+                const upDoc = {
+                    $set: {
+                        taskName,
+                        description,
+                        imageLink,
+                        email
+                    }
+                }
+                const result = await todoCollection.updateOne(filter, upDoc, option);
+                res.send(result)
+            }
+            catch {
+                res.send("cannot Advertise product")
+            }
+        })
+
         app.delete('/deletetask', async (req, res) => {
             try {
                 const id = req.query.id;
-                console.log(id)
                 const filter = { _id: ObjectId(id) }
                 const result = await todoCollection.deleteOne(filter);
-                console.log(result)
                 res.send(result)
             }
             catch {
